@@ -4,4 +4,3 @@ matplotlib
 pytest
 coverage
 streamlit
-PyQt6
