@@ -1,179 +1,149 @@
-
-# Importer les bibliothèques nécessaires
-from pathlib import Path
-
-import pandas as pd
 import streamlit as st
+from pathlib import Path
+import pandas as pd
+import matplotlib.pyplot as plt
 
-
-# Charger le fichier CSV contenant les données
-CHEMIN_CSV = (
+# Load the sports dataset
+DATA_PATH = (
     Path(__file__).resolve().parent.parent
     / "donnees"
     / "sports_betting_predictive_analysis.csv"
 )
 
-df = pd.read_csv(CHEMIN_CSV)
+df = pd.read_csv(DATA_PATH)
 
-
-# Configurer l'application
+# Configure the application
 st.set_page_config(
-    page_title="BettingAddicts de Christian et Felix",
+    page_title="BettingAddicts",
     page_icon="🏆",
     layout="centered"
 )
 
 
-# Ajouter le style de l'interface
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background-color: #101820;
-    }
+# Display the application header
+st.title("🏆 BettingAddicts")
 
-    h1, h2, h3, p, label {
-        color: #F2F5F7;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.caption("Sports match prediction platform")
 
-
-# Initialiser la page actuelle
-if "page" not in st.session_state:
-    st.session_state.page = 1
-
-
-# Afficher le titre de l'application
-st.title("🏆 BettingAddicts de Christian et Felix")
-st.caption("Sports prediction platform")
 st.divider()
 
+# Sport selection
+st.header("Choose your sport")
 
-# PAGE 1 : Sélection du sport
-if st.session_state.page == 1:
+sports = sorted(df["Sport"].dropna().unique())
 
-    st.caption("STEP 1 OF 3")
-    st.progress(1 / 3)
+selected_sport = st.selectbox(
+    "Select a sport:",
+    sports
+)
 
-    st.header("Choose your sport")
-    st.write("Select the sport you want to analyze.")
+st.write(f"You selected: {selected_sport}")
 
-    # Récupérer les sports disponibles dans le CSV
-    sports = sorted(df["Sport"].dropna().unique())
+# Get the matches belonging to the selected sport
+sport_data = df[df["Sport"] == selected_sport]
 
-    sport = st.selectbox(
-        "Sport",
-        sports
-    )
+# Collect all available teams
+teams = sorted(
+    pd.concat([
+        sport_data["Home_Team"],
+        sport_data["Away_Team"]
+    ]).dropna().unique()
+)
 
-    # Passer à la page suivante
-    if st.button("Continue →", use_container_width=True):
+# Select the two teams
+st.header("Choose your matchup")
 
-        st.session_state.sport = sport
-        st.session_state.page = 2
-        st.rerun()
+home_team = st.selectbox(
+    "Home team:",
+    teams
+)
 
+away_team = st.selectbox(
+    "Away team:",
+    teams
+)
 
-# PAGE 2 : Sélection des équipes
-elif st.session_state.page == 2:
+# Prevent selecting the same team twice
+if home_team == away_team:
+    st.warning("Please select two different teams.")
+else:
+    st.success(f"{home_team} vs {away_team}")
 
-    st.caption("STEP 2 OF 3")
-    st.progress(2 / 3)
+# Enter the betting odds
+st.divider()
 
-    st.header("Choose your matchup")
-    st.write(f"Selected sport: **{st.session_state.sport}**")
+st.header("Enter match odds")
 
-    # Filtrer les données selon le sport choisi
-    donnees_sport = df[df["Sport"] == st.session_state.sport]
+col1, col2 = st.columns(2)
 
-    # Récupérer toutes les équipes disponibles
-    participants = sorted(
-        set(donnees_sport["Home_Team"].dropna())
-        | set(donnees_sport["Away_Team"].dropna())
-    )
-
-    # Choisir les deux participants
-    home_team = st.selectbox(
-        "Home team",
-        participants
-    )
-
-    away_team = st.selectbox(
-        "Away team",
-        participants
-    )
-
-    col1, col2 = st.columns(2)
-
-    # Revenir à la page précédente
-    with col1:
-        if st.button("← Back", use_container_width=True):
-            st.session_state.page = 1
-            st.rerun()
-
-    # Vérifier les équipes et continuer
-    with col2:
-        if st.button("Continue →", use_container_width=True):
-
-            if home_team == away_team:
-                st.error("Choose two different participants.")
-
-            else:
-                st.session_state.home_team = home_team
-                st.session_state.away_team = away_team
-
-                st.session_state.page = 3
-                st.rerun()
-
-
-# PAGE 3 : Informations sur le match
-elif st.session_state.page == 3:
-
-    st.caption("STEP 3 OF 3")
-    st.progress(1.0)
-
-    st.header("Match odds")
-
-    # Afficher les informations du match
-    st.write(f"Sport: **{st.session_state.sport}**")
-    st.write(f"Home team: **{st.session_state.home_team}**")
-    st.write(f"Away team: **{st.session_state.away_team}**")
-
-    st.divider()
-
-    st.subheader("Enter match odds")
-
-    # Entrer les cotes des deux équipes
+with col1:
     home_odds = st.number_input(
-        "Home team odds",
+        "Home team odds:",
         min_value=1.01,
         value=2.00,
         step=0.05
     )
 
+with col2:
     away_odds = st.number_input(
-        "Away team odds",
+        "Away team odds:",
         min_value=1.01,
         value=2.00,
         step=0.05
     )
 
-    col1, col2 = st.columns(2)
 
-    # Revenir à la sélection des équipes
-    with col1:
-        if st.button("← Back", use_container_width=True):
-            st.session_state.page = 2
-            st.rerun()
+# Introduction
+st.subheader("Welcome")
 
-    # Enregistrer les informations du match
-    with col2:
-        if st.button("Continue →", use_container_width=True):
+st.write(
+    "Analyze a sports matchup and explore its predicted outcome."
+)
 
-            st.session_state.home_odds = home_odds
-            st.session_state.away_odds = away_odds
+# Generate the prediction
+st.divider()
 
-            st.success("Match information saved!")
+if st.button("Predict match", use_container_width=True):
+
+    if home_team == away_team:
+        st.error("Please select two different teams.")
+
+    else:
+        st.subheader("Match summary")
+        st.caption(f"Sport: {selected_sport}")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric(
+                label=home_team,
+                value=f"{home_odds:.2f}",
+                help="Home team betting odds"
+            )
+
+        with col2:
+            st.metric(
+                label=away_team,
+                value=f"{away_odds:.2f}",
+                help="Away team betting odds"
+            )
+
+        # Display illustrative probabilities
+        st.subheader("Illustrative win probabilities")
+
+        teams = [home_team, away_team]
+        probabilities = [60, 40]
+
+        fig, ax = plt.subplots()
+
+        ax.bar(teams, probabilities)
+
+        ax.set_ylabel("Probability (%)")
+        ax.set_ylim(0, 100)
+        ax.set_title("Match outcome probabilities")
+
+        st.pyplot(fig)
+
+        plt.close(fig)
+
+
