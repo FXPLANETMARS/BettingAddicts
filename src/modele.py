@@ -1,9 +1,6 @@
 """Entraînement, évaluation, prédiction et sauvegarde du modèle."""
 import json
 import os
-import time
-from typing import Callable
-
 import joblib  # Sauvegarde le modèle dans un fichier
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
@@ -11,18 +8,6 @@ from sklearn.linear_model import LogisticRegression
 from donnees import creer_variable, Variable
 from exceptions import DonneeInvalideError, ModeleIntrouvableError
 
-
-def chronometrer(fonction: Callable) -> Callable:
-    """Décorateur : affiche la durée d'exécution de la méthode entrainer."""
-
-    def nouvelle(modele: "EntraineurModele", x_train: list, y_train: pd.Series) -> None:
-        debut = time.time()  # Heure avant, en secondes
-        resultat = fonction(modele, x_train, y_train)  # Exécute la vraie fonction
-        fin = time.time()  # Heure après
-        print("Duree de l'entrainement :", round(fin - debut, 3), "s")
-        return resultat
-
-    return nouvelle  # Sans parenthèses : on retourne la fonction sans l'exécuter
 
 
 class EntraineurModele:
@@ -42,7 +27,6 @@ class EntraineurModele:
         """Modèle scikit-learn sous-jacent (lecture seule)."""
         return self._algorithme
 
-    @chronometrer  # Équivaut à entrainer = chronometrer(entrainer)
     def entrainer(self, x_train: list, y_train: pd.Series) -> None:
         """Montre au modèle les matchs d'entraînement et leurs résultats pour qu'il apprenne."""
         self._algorithme.fit(x_train, y_train)

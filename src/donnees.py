@@ -2,11 +2,9 @@
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-
 import matplotlib.pyplot as plt  # Outil de graphiques (pour tracer_resultats)
 import pandas as pd
 from sklearn.model_selection import train_test_split
-
 from exceptions import DonneeInvalideError  # Notre exception personnalisée
 
 
