@@ -6,7 +6,7 @@ from donnees import JeuDeDonnees, VariableNumerique, VariableCategorielle, creer
 from exceptions import DonneeInvalideError, ModeleIntrouvableError  # Importe nos erreurs
 
 
-def chronometrer(fonction):  # Le décorateur reçoit la fonction à décorer
+def chronometrer(fonction):
     def nouvelle(modele, x_train, y_train):  # La nouvelle version a les mêmes paramètres que entrainer
         debut = time.time()  # L'heure avant, en secondes
         resultat = fonction(modele, x_train, y_train)  # Exécute la vraie fonction
