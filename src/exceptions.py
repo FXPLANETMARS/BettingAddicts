@@ -1,6 +1,11 @@
-class DonneeInvalideError(Exception):  # Nouvelle classe d'erreur, enfant de Exception
-    pass  # Rien d'ajouté : seul le nom de l'exception compte
+"""Exceptions personnalisées du projet."""
 
 
-class ModeleIntrouvableError(Exception):  # Même chose, pour signaler un fichier de modèle manquant
+class DonneeInvalideError(Exception):
+    """Levée quand une saisie ou une donnée ne respecte pas les règles attendues."""
+    pass
+
+
+class ModeleIntrouvableError(Exception):
+    """Levée quand le modèle sauvegardé ou ses métadonnées sont introuvables."""
     pass
