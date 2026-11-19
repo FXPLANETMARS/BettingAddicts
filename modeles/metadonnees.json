@@ -1,0 +1,53 @@
+{
+  "colonnes": [
+    "Sport",
+    "Home_Team_Odds",
+    "Away_Team_Odds",
+    "Draw_Odds",
+    "Mois"
+  ],
+  "variables": [
+    {
+      "nom": "Sport",
+      "type": "categorielle",
+      "valeurs": [
+        "Baseball",
+        "Basketball",
+        "Football",
+        "Hockey",
+        "Tennis"
+      ]
+    },
+    {
+      "nom": "Home_Team_Odds",
+      "type": "numerique",
+      "minimum": 1.2,
+      "maximum": 4.98
+    },
+    {
+      "nom": "Away_Team_Odds",
+      "type": "numerique",
+      "minimum": 1.21,
+      "maximum": 5.0
+    },
+    {
+      "nom": "Draw_Odds",
+      "type": "numerique",
+      "minimum": 0.0,
+      "maximum": 4.98
+    },
+    {
+      "nom": "Mois",
+      "type": "numerique",
+      "minimum": 1.0,
+      "maximum": 12.0
+    }
+  ],
+  "classes": [
+    "Away",
+    "Draw",
+    "Home"
+  ],
+  "exactitude": 0.43673469387755104,
+  "reference": 0.40408163265306124
+}
