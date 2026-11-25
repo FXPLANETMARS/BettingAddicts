@@ -203,8 +203,8 @@ def afficher_historique() -> None:
 
 def afficher_progression(etape: int) -> None:
     """Montre où l'utilisateur se trouve dans le parcours de prédiction."""
-    st.progress(etape / 3)
-    st.caption(f"Step {etape} of 3")
+    st.progress(etape / 4)
+    st.caption(f"Step {etape} of 4")
 
 
 # -----------------------------------------------------------------------------
@@ -213,7 +213,7 @@ def afficher_progression(etape: int) -> None:
 st.title("🏆 BettingAddicts")
 st.caption("Sports match prediction platform")
 st.markdown(
-    "Follow three simple steps to explore a matchup and see the model's prediction."
+    "Follow four simple steps to explore a matchup and review the model's prediction."
 )
 st.info(
     "Educational project only. Predictions are estimates from a simple model, "
@@ -247,6 +247,13 @@ if "etape" not in st.session_state:
 if "sport_choisi" not in st.session_state:
     st.session_state["sport_choisi"] = sports[0]
 
+# Ces clés appartiennent à l'application, pas aux widgets Streamlit.
+# Elles conservent les équipes même lorsque la page de sélection disparaît.
+if "equipe_domicile_choisie" not in st.session_state:
+    st.session_state["equipe_domicile_choisie"] = None
+if "equipe_exterieure_choisie" not in st.session_state:
+    st.session_state["equipe_exterieure_choisie"] = None
+
 etape = st.session_state["etape"]
 afficher_progression(etape)
 
@@ -279,9 +286,14 @@ if etape == 1:
             for cle in (
                 "home_team_choice",
                 "away_team_choice",
+                "equipe_domicile_choisie",
+                "equipe_exterieure_choisie",
                 "derniere_prediction",
+                "saisies_brouillon",
             ):
                 st.session_state.pop(cle, None)
+            st.session_state["equipe_domicile_choisie"] = None
+            st.session_state["equipe_exterieure_choisie"] = None
             for variable in variables:
                 st.session_state.pop(f"input_{variable['nom']}", None)
 
@@ -307,8 +319,8 @@ if etape == 2:
     if len(equipes) < 2:
         st.error("At least two teams are required for the selected sport.")
     else:
-        ancien_domicile = st.session_state.get("home_team_choice")
-        ancien_exterieur = st.session_state.get("away_team_choice")
+        ancien_domicile = st.session_state.get("equipe_domicile_choisie")
+        ancien_exterieur = st.session_state.get("equipe_exterieure_choisie")
         index_domicile = equipes.index(ancien_domicile) if ancien_domicile in equipes else 0
         index_exterieur = equipes.index(ancien_exterieur) if ancien_exterieur in equipes else min(1, len(equipes) - 1)
 
@@ -349,9 +361,20 @@ if etape == 2:
             if equipe_domicile == equipe_exterieure:
                 st.error("Please select two different teams.")
             else:
-                st.session_state["home_team_choice"] = equipe_domicile
-                st.session_state["away_team_choice"] = equipe_exterieure
-                st.session_state.pop("derniere_prediction", None)
+                # Copier les choix dans des clés durables indépendantes des widgets.
+                # Streamlit peut supprimer les clés des selectbox quand l'étape 2
+                # n'est plus affichée.
+                anciennes_equipes = (
+                    st.session_state.get("equipe_domicile_choisie"),
+                    st.session_state.get("equipe_exterieure_choisie"),
+                )
+                nouvelles_equipes = (equipe_domicile, equipe_exterieure)
+                if anciennes_equipes != nouvelles_equipes:
+                    st.session_state.pop("derniere_prediction", None)
+                    st.session_state.pop("saisies_brouillon", None)
+
+                st.session_state["equipe_domicile_choisie"] = equipe_domicile
+                st.session_state["equipe_exterieure_choisie"] = equipe_exterieure
                 st.session_state["etape"] = 3
                 st.rerun()
 
@@ -361,8 +384,8 @@ if etape == 2:
 # -----------------------------------------------------------------------------
 if etape == 3:
     sport_choisi = st.session_state["sport_choisi"]
-    equipe_domicile = st.session_state.get("home_team_choice")
-    equipe_exterieure = st.session_state.get("away_team_choice")
+    equipe_domicile = st.session_state.get("equipe_domicile_choisie")
+    equipe_exterieure = st.session_state.get("equipe_exterieure_choisie")
 
     # Empêcher l'accès à cette étape si la sélection des équipes est incomplète.
     if not equipe_domicile or not equipe_exterieure:
@@ -385,6 +408,9 @@ if etape == 3:
         st.caption("Each model input appears once. The fields are built from the saved model metadata.")
 
         saisies = {"Sport": sport_choisi}
+        derniere_saisie = st.session_state.get("saisies_brouillon") or st.session_state.get(
+            "derniere_prediction", {}
+        ).get("saisies", {})
         colonnes_saisie = st.columns(2)
 
         index_champ = 0
@@ -397,15 +423,29 @@ if etape == 3:
             index_champ += 1
             with conteneur:
                 if variable["type"] == "categorielle":
+                    valeurs = variable["valeurs"]
+                    valeur_precedente = derniere_saisie.get(nom)
+                    index_valeur = (
+                        valeurs.index(valeur_precedente)
+                        if valeur_precedente in valeurs
+                        else 0
+                    )
                     saisies[nom] = st.selectbox(
                         nom.replace("_", " "),
-                        variable["valeurs"],
+                        valeurs,
+                        index=index_valeur,
                         key=f"input_{nom}",
                     )
                 else:
                     minimum = float(variable["minimum"])
                     maximum = float(variable["maximum"])
                     valeur = valeur_initiale(variable, sport_supporte_nul)
+                    valeur_precedente = derniere_saisie.get(nom)
+                    if valeur_precedente is not None:
+                        try:
+                            valeur = min(max(float(valeur_precedente), minimum), maximum)
+                        except (TypeError, ValueError):
+                            pass
                     est_mois = nom == "Mois"
                     cote_nul_inapplicable = nom == "Draw_Odds" and not sport_supporte_nul
 
@@ -448,7 +488,8 @@ if etape == 3:
             )
 
     if retour:
-        st.session_state.pop("derniere_prediction", None)
+        # Conserver les champs saisis même si l'utilisateur revient choisir les équipes.
+        st.session_state["saisies_brouillon"] = dict(saisies)
         st.session_state["etape"] = 2
         st.rerun()
 
@@ -463,8 +504,10 @@ if etape == 3:
                 "classe": classe_predite,
                 "probabilites": probabilites,
                 "sport_supporte_nul": sport_supporte_nul,
+                "saisies": dict(saisies),
             }
             st.session_state["derniere_prediction"] = derniere_prediction
+            st.session_state["saisies_brouillon"] = dict(saisies)
 
             # La confiance enregistrée correspond à la probabilité de la classe prédite.
             confiance = probabilites.get(classe_predite, 0.0) * 100
@@ -484,52 +527,111 @@ if etape == 3:
                     confiance,
                     details_historique,
                 )
-                st.success("Prediction saved to history.")
+                st.session_state["message_historique"] = "Prediction saved to history."
             except (OSError, ValueError, pd.errors.ParserError) as erreur:
-                st.warning(f"The prediction was generated, but could not be saved: {erreur}")
+                st.session_state["message_historique"] = (
+                    f"The prediction was generated, but could not be saved: {erreur}"
+                )
+
+            # Passer à une véritable quatrième page de résumé.
+            st.session_state["etape"] = 4
+            st.rerun()
 
         except DonneeInvalideError as erreur:
             st.error(f"Please check the match information: {erreur}")
         except (KeyError, TypeError, ValueError) as erreur:
             st.error(f"The prediction could not be generated from these inputs: {erreur}")
 
-    resultat = st.session_state.get("derniere_prediction")
-    if resultat is not None:
-        st.divider()
-        st.subheader("Prediction result")
 
-        with st.container(border=True):
-            libelle = libelle_resultat(
-                resultat["classe"],
-                resultat["home_team"],
-                resultat["away_team"],
+# -----------------------------------------------------------------------------
+# Étape 4 : résumé complet de la prédiction
+# -----------------------------------------------------------------------------
+if etape == 4:
+    resultat = st.session_state.get("derniere_prediction")
+
+    if resultat is None:
+        st.warning("No prediction is available yet. Enter the match information first.")
+        st.session_state["etape"] = 3
+        st.rerun()
+
+    st.header("4. Your prediction summary")
+    st.markdown(
+        f"Review the complete information and model result for **{resultat['sport']}**."
+    )
+
+    if st.session_state.get("message_historique"):
+        message = st.session_state.pop("message_historique")
+        if message.startswith("Prediction saved"):
+            st.success(message)
+        else:
+            st.warning(message)
+
+    with st.container(border=True):
+        st.subheader("Match information")
+        col_sport, col_home, col_away = st.columns(3)
+        col_sport.metric("Sport", resultat["sport"])
+        col_home.metric("Home team", resultat["home_team"])
+        col_away.metric("Away team", resultat["away_team"])
+
+        st.markdown("**Prediction inputs**")
+        saisies_resultat = resultat.get("saisies", {})
+        variables_affichees = [v for v in variables if v["nom"] != "Sport"]
+        colonnes_details = st.columns(2)
+        for index, variable in enumerate(variables_affichees):
+            nom = variable["nom"]
+            valeur = saisies_resultat.get(nom, "Not provided")
+            if nom == "Draw_Odds" and not resultat["sport_supporte_nul"]:
+                valeur_affichee = "Not applicable for this sport"
+            elif isinstance(valeur, (int, float)):
+                valeur_affichee = f"{float(valeur):.2f}"
+            else:
+                valeur_affichee = str(valeur)
+
+            with colonnes_details[index % 2]:
+                st.metric(nom.replace("_", " "), valeur_affichee)
+
+    st.subheader("Model prediction")
+    with st.container(border=True):
+        libelle = libelle_resultat(
+            resultat["classe"],
+            resultat["home_team"],
+            resultat["away_team"],
+        )
+
+        if resultat["classe"] == "Draw" and not resultat["sport_supporte_nul"]:
+            st.warning(
+                "The model returned Draw, but this sport has no draw odds in the training "
+                "dataset. One model is shared across several sports, so this result is a "
+                "model limitation rather than a possible match outcome."
+            )
+        elif resultat["classe"] == "Draw":
+            st.info(f"Predicted outcome: {libelle}")
+        else:
+            st.success(f"Predicted outcome: {libelle}")
+
+        confiance = resultat["probabilites"].get(resultat["classe"], 0.0) * 100
+        st.metric("Probability of the predicted outcome", f"{confiance:.1f}%")
+
+        if not resultat["sport_supporte_nul"] and resultat["classe"] != "Draw":
+            st.caption(
+                "The model may still assign probability to Draw, even though the training "
+                "dataset has no draw odds for this sport. Interpret that value as a model limitation."
             )
 
-            if resultat["classe"] == "Draw" and not resultat["sport_supporte_nul"]:
-                st.warning(
-                    "The model returned Draw, but this sport has no draw odds in the training "
-                    "dataset. One model is shared across several sports, so this result is a "
-                    "model limitation rather than a possible match outcome."
-                )
-            elif resultat["classe"] == "Draw":
-                st.info(f"Predicted outcome: {libelle}")
-            else:
-                st.success(f"Predicted outcome: {libelle}")
+        st.markdown("**Outcome probabilities**")
+        afficher_probabilites(resultat)
 
-            confiance = resultat["probabilites"].get(resultat["classe"], 0.0) * 100
-            st.metric("Probability of the predicted outcome", f"{confiance:.1f}%")
-
-            if not resultat["sport_supporte_nul"] and resultat["classe"] != "Draw":
-                st.caption(
-                    "The model may still assign probability to Draw, even though the training "
-                    "dataset has no draw odds for this sport. Interpret that value as a model limitation."
-                )
-
-            st.markdown("**Outcome probabilities**")
-            afficher_probabilites(resultat)
-
-        if st.button("Start a new prediction", type="primary"):
+    colonne_modifier, colonne_nouvelle = st.columns(2)
+    with colonne_modifier:
+        if st.button("Edit match information", use_container_width=True):
+            st.session_state["etape"] = 3
+            st.rerun()
+    with colonne_nouvelle:
+        if st.button("Start a new prediction", type="primary", use_container_width=True):
             st.session_state.pop("derniere_prediction", None)
+            st.session_state.pop("saisies_brouillon", None)
+            st.session_state.pop("equipe_domicile_choisie", None)
+            st.session_state.pop("equipe_exterieure_choisie", None)
             st.session_state["etape"] = 1
             st.rerun()
 

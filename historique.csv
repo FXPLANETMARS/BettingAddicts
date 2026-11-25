@@ -1,10 +1,11 @@
-Sport,Home_Team,Away_Team,Prediction,Home_Probability,Draw_Probability,Away_Probability
-Basketball,Alanbury Tigers,Acostaborough Bears,Home,0.5742677463341822,0.0062912078813152,0.4194410457845025
-Basketball,Alanbury Tigers,Acostaborough Bears,Home,0.5742677463341822,0.0062912078813152,0.4194410457845025
-Tennis,Alexandraside Wolves,Alberttown Bears,Home,0.5320317133545909,0.0064185133715689,0.4615497732738402
-Tennis,Alexandraside Wolves,Amandaville Bears,Home,0.5320317133545909,0.0064185133715689,0.4615497732738402
-Tennis,Alexandraside Wolves,Amandaville Bears,Home,0.5322456415649625,0.0077851889014652,0.4599691695335722
-Baseball,Alejandrostad Tigers,Alexanderfurt Wolves,Home,0.5234346738194153,0.0045475626557919,0.4720177635247927
-Baseball,Alejandrostad Tigers,Alexanderfurt Wolves,Home,0.5706091360891211,0.0066283535186101,0.4227625103922688
-Baseball,Amberberg Eagles,Alexanderfurt Wolves,Home,0.5706091360891211,0.0066283535186101,0.4227625103922688
-Football,Aaronberg Bears,Andrefurt Eagles,Home,0.4470352818785938,0.1873496039451964,0.36561511417620973
+Sport,Home_Team_Odds,Away_Team_Odds,Draw_Odds,Mois,Home_Team,Away_Team,Home_Probability,Draw_Probability,Away_Probability,Prediction,Confiance_pct,Date
+Basketball,,,,,Alanbury Tigers,Acostaborough Bears,0.5742677463341822,0.0062912078813152,0.4194410457845025,Home,,
+Basketball,,,,,Alanbury Tigers,Acostaborough Bears,0.5742677463341822,0.0062912078813152,0.4194410457845025,Home,,
+Tennis,,,,,Alexandraside Wolves,Alberttown Bears,0.5320317133545909,0.0064185133715689,0.4615497732738402,Home,,
+Tennis,,,,,Alexandraside Wolves,Amandaville Bears,0.5320317133545909,0.0064185133715689,0.4615497732738402,Home,,
+Tennis,,,,,Alexandraside Wolves,Amandaville Bears,0.5322456415649625,0.0077851889014652,0.4599691695335722,Home,,
+Baseball,,,,,Alejandrostad Tigers,Alexanderfurt Wolves,0.5234346738194153,0.0045475626557919,0.4720177635247927,Home,,
+Baseball,,,,,Alejandrostad Tigers,Alexanderfurt Wolves,0.5706091360891211,0.0066283535186101,0.4227625103922688,Home,,
+Baseball,,,,,Amberberg Eagles,Alexanderfurt Wolves,0.5706091360891211,0.0066283535186101,0.4227625103922688,Home,,
+Football,,,,,Aaronberg Bears,Andrefurt Eagles,0.4470352818785938,0.1873496039451964,0.3656151141762097,Home,,
+Baseball,1.85,2.0,0.0,5.0,Alejandrostad Tigers,Alexanderfurt Wolves,0.5191296214867785,0.004749075006598702,0.4761213035066228,Home,51.9,2026-11-25 17:24:29
