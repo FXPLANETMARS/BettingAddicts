@@ -1,0 +1,16 @@
+# Journal d'utilisation de l'IA
+
+Outil utilisé : Claude (Anthropic). Chaque membre de l'équipe doit relire ce journal et corriger ce qui ne correspond pas
+à ce qu'il a réellement fait. Les éléments marqués **À CONFIRMER** dépendent de vérifications que l'équipe doit faire elle-même.
+Si votre coéquipier a utilisé une IA pour `interface.py` ou autre chose, ajoutez ses entrées ici.
+
+| Outil | Ce que vous avez demandé | Réponse reçue | Vérification faite | Décision |
+|---|---|---|---|---|
+| Claude | Vérifier que notre code respecte les 3 conditions du chargé de laboratoire (5 caractéristiques, pas de reconnaissance de nombre, prédiction pas en dur) | Le code n'utilisait que 2 caractéristiques ; `dropna()` ne laissait que 443 lignes ; les nuls étaient classés « Away » | Lecture du CSV : `Draw_Odds` vide dans 871 lignes sur 1369, 179 matchs nuls | **Gardé** : on a ajouté `Sport`, `Draw_Odds` et `Mois`, et corrigé `nettoyer()` |
+| Claude | Éviter le `lambda` du résultat, car on ne le comprenait pas | Expliqué, avec une alternative en fonction normale `determiner_resultat` | Explication de l'IA relue, puis discussion dans l'équipe (**À CONFIRMER**) | **Rejeté** : on a gardé le lambda |
+| Claude | Encoder le sport en nombres | Première réponse avec `reshape`, `hstack` et une comparaison NumPy à 2 dimensions | On a constaté que ces outils ne sont pas dans les notes de cours ; l'IA a ensuite relu les chapitres 7, 11 et 12 | **Rejeté** puis **modifié** : version avec boucles `for` et listes, et `(y_test == predictions).mean()` pour l'exactitude |
+| Claude | Comprendre pourquoi le modèle semblait « moins bon » (58,4 % avant, 43,7 % après) | Les deux scores ne sont pas comparables : avant, 2 classes et 443 lignes, avec une exactitude égale à la référence (58,4 %) | Recalcul de l'ancienne version sur notre CSV | **Gardé** le nouveau modèle : il bat sa référence (40,4 %), l'ancien non. **Cette vérification a changé notre décision** (on pensait avoir fait une erreur) |
+| Claude | Écrire `main.py` et le lancer depuis PyCharm | Version avec chemins relatifs (`src/interface.py`) | Erreur « File does not exist: src/interface.py » : PyCharm exécute dans `src/` | **Modifié** : chemins construits avec `os.path` à partir de l'emplacement du fichier |
+| Claude | Brancher `interface.py` sur le modèle | Une lecture du code a montré que les probabilités étaient écrites en dur (`[60, 40]`) ; l'interface appelle maintenant `predire()` | Test à l'écran : les barres changent quand les cotes changent (**À CONFIRMER** avec le vrai Streamlit) | **Modifié** |
+| Claude | Écrire les tests pytest | 13 tests, puis 22 cas avec les ajouts (historique, classe abstraite, hors intervalle) | Relecture des tests ; exécutés par l'IA dans un environnement simulé. **À CONFIRMER : lancer `pytest` chez nous et noter le résultat** | **Gardé** |
+| Claude | Ajouter docstrings, annotations de type, classe abstraite, attributs protégés, historique des prédictions | Fichiers réécrits à partir de notre code | Exécution du pipeline complet (mêmes scores) et relecture. **À CONFIRMER : relire chaque ligne** | **Gardé** |
