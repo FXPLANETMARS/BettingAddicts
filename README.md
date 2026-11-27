@@ -11,7 +11,7 @@ affiche la probabilité de chacun dans un graphique et garde un historique des p
 
 ## Données
 - **Fichier :** `donnees/sports_betting_predictive_analysis.csv` (1369 lignes, 10 colonnes ; 1223 lignes après nettoyage).
-- **Source et licence :** À COMPLÉTER (lien de la page du jeu de données et licence indiquée sur cette page).
+- **Source et licence :(https://creativecommons.org/publicdomain/zero/1.0/)
 - Aucune donnée personnelle. Les noms d'équipes semblent générés artificiellement (à vérifier auprès de la source).
 
 ## Installation et lancement
