@@ -5,24 +5,32 @@ Projet 2 d'INF1007 (A2026), par Christian et Felix.
 > ⚠️ **Exercice pédagogique.** Cet outil n'est PAS une aide à la décision pour parier.
 
 ## Ce que fait l'application
-L'utilisateur choisit un sport, entre les cotes du match (domicile, visiteur, nul) et le mois.
+L'utilisateur choisit un sport, sélectionne les équipes du match, entre les cotes (domicile, visiteur, nul) et le mois.
 Le modèle prédit le résultat le plus probable (victoire à domicile, victoire du visiteur ou match nul),
-affiche la probabilité de chacun dans un graphique et garde un historique des prédictions.
+affiche la probabilité de chaque résultat dans un graphique et conserve un historique des prédictions.
 
 ## Données
 - **Fichier :** `donnees/sports_betting_predictive_analysis.csv` (1369 lignes, 10 colonnes ; 1223 lignes après nettoyage).
-- **Source et licence :(https://creativecommons.org/publicdomain/zero/1.0/)
+- **Source :** [Kaggle — Sports Betting Predictive Analysis Dataset 2025](https://www.kaggle.com/datasets/pratyushpuri/sports-betting-predictive-analysis-dataset).
+- **Licence indiquée :** [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) 
 - Aucune donnée personnelle. Les noms d'équipes semblent générés artificiellement (à vérifier auprès de la source).
+
+Les lignes où la cote domicile, la cote visiteur ou le sport est manquant sont supprimées. Les valeurs manquantes de `Draw_Odds` sont remplacées par `0.0`. Cette convention facilite le traitement, mais ne signifie pas nécessairement qu'un match nul est impossible.
 
 ## Installation et lancement
 ```
 pip install -r requirements.txt
 python src/main.py
 ```
-`main.py` entraîne le modèle s'il n'existe pas encore (il n'est jamais ré-entraîné inutilement),
-puis lance l'interface Streamlit dans le navigateur.
+`main.py` entraîne le modèle s'il n'existe pas encore (il n'est jamais ré-entraîné inutilement), puis lance l'interface Streamlit dans le navigateur.
 
-Tests et couverture :
+Si le lancement par `main.py` pose un problème sous Windows, l'interface peut aussi être lancée directement avec :
+```
+python -m streamlit run src/interface.py
+```
+Cette deuxième commande suppose que le modèle est déjà entraîné et sauvegardé.
+
+## Tests et couverture
 ```
 pytest
 coverage run -m pytest
@@ -39,11 +47,11 @@ src/
 ├── exceptions.py   DonneeInvalideError, ModeleIntrouvableError
 ├── donnees.py      Variable (abstraite) → VariableNumerique / VariableCategorielle ; JeuDeDonnees
 ├── modele.py       EntraineurModele : entraîner, évaluer, prédire, sauvegarder, charger
-├── historique.py   historique des prédictions (fichier CSV)
-├── interface.py    interface Streamlit (appelle la logique, ne la contient pas)
-└── main.py         point d'entrée
+├── historique.py   Historique des prédictions (fichier CSV)
+├── interface.py    Interface Streamlit (appelle la logique, ne la contient pas)
+└── main.py         Point d'entrée
 tests/              test_donnees.py, test_modele.py, test_historique.py
-modeles/            modèle sauvegardé (.joblib), métadonnées (.json), graphique d'exploration, historique
+modeles/            Modèle sauvegardé (.joblib), métadonnées (.json), graphique d'exploration, historique
 ```
 
 ## Modèle
@@ -69,8 +77,12 @@ Nous n'avons pas produit de matrice de confusion.
 - **Fonctions `lambda`** (`donnees.py`, `nettoyer`) : une petite fonction sans nom qui retire les espaces de chaque case,
   et une autre qui calcule le résultat (Home / Away / Draw) de chaque match.
 
+## Documents de suivi
+- `DECISIONS.md` : fiche des décisions et justifications du projet.
+- `JOURNAL_IA.md` : journal d'utilisation et de vérification des réponses de l'IA.
+
 ## Documentation officielle consultée
-À COMPLÉTER avec les pages que vous avez réellement consultées (au moins 3 : pandas, scikit-learn, Streamlit). Exemples de pages possibles :
+Références à conserver si elles ont réellement été consultées par l'équipe (au moins 3 pages sont demandées) :
 - pandas : https://pandas.pydata.org/docs/user_guide/10min.html
 - scikit-learn : https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
 - Streamlit : https://docs.streamlit.io
